@@ -3,13 +3,14 @@ import replicate
 import os
 
 # App title
-st.set_page_config(page_title="🦙💬 Llama 2 Chatbot")
+st.set_page_config(page_title="🦙💬 Llama 2 Chatbot by Esmail Gumaan")
 
 # Replicate Credentials
 with st.sidebar:
     st.title('🦙💬 Llama 2 Chatbot')
+    st.title('👨‍💻🤖: Esmail A.Gumaan ')
     st.write('This chatbot is created using the open-source Llama 2 LLM model from Meta.')
-    replicate_api = 'r8_UahbUTs46FYocsRg4H6AmUaFKpntsRY1b0aEY'
+    replicate_api = 'r8_PQsvGJTah0Wf2VKD00bciIb2Hnrq8Kg0ZE4w9'
     os.environ['REPLICATE_API_TOKEN'] = replicate_api
 
     st.subheader('Models and parameters')
