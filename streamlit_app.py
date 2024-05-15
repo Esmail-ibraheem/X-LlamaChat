@@ -1,190 +1,69 @@
 import streamlit as st
+import replicate
+import os
 
-# Page layout
-st.set_page_config(layout="wide") # check this out, if i can change it.
+# App title
+st.set_page_config(page_title="🦙💬 Llama 2 Chatbot")
 
+# Replicate Credentials
+with st.sidebar:
+    st.title('🦙💬 Llama 2 Chatbot')
+    st.write('This chatbot is created using the open-source Llama 2 LLM model from Meta.')
+    replicate_api = 'r8_UahbUTs46FYocsRg4H6AmUaFKpntsRY1b0aEY'
+    os.environ['REPLICATE_API_TOKEN'] = replicate_api
 
+    st.subheader('Models and parameters')
+    selected_model = st.sidebar.selectbox('Choose a Llama2 model', ['Llama2-7B', 'Llama2-13B'], key='selected_model')
+    if selected_model == 'Llama2-7B':
+        llm = 'a16z-infra/llama7b-v2-chat:4f0a4744c7295c024a1de15e1a63c880d3da035fa1f49bfd344fe076074c8eea'
+    elif selected_model == 'Llama2-13B':
+        llm = 'a16z-infra/llama13b-v2-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5'
+    temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
+    top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.9, step=0.01)
+    max_length = st.sidebar.slider('max_length', min_value=32, max_value=128, value=120, step=8)
 
+# Store LLM generated responses
+if "messages" not in st.session_state.keys():
+    st.session_state.messages = [{"role": "assistant", "content": "How may I assist you today?"}]
 
-# Function to display profile information
-def display_profile():
-    st.markdown("<h1 style='text-align: center;'>Esmail Atta Gumaan</h1>", unsafe_allow_html=True)
-    st.markdown(
-        """
-        <div style='display: flex; justify-content: center;'>
-            <div style='margin: 0px 15px;'>
-                <a href="https://github.com/Esmail-ibraheem" target="_blank"><img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="30"></a>
-            </div>
-            <div style='margin: 0px 15px;'>
-                <a href="https://www.linkedin.com/in/esmail-a-gumaan/overlay/about-this-profile/?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base%3Bq0oKg70tTTWC9g5ncLpjSQ%3D%3D" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/LinkedIn_logo_initials.png/768px-LinkedIn_logo_initials.png" width="30"></a>
-            </div>
-            <div style='margin: 0px 15px;'>
-               <a href="esm.agumaan@gmail.com"><img src="https://th.bing.com/th/id/OIP.s7EtuTVtm1-iBfs188J-lAAAAA?w=474&h=474&rs=1&pid=ImgDetMain" width="30"></a>
-        </div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    st.write("# Personal Information")
-    st.write("- **Degree:** B.A. Computer science student")
-    st.write("- **Univeristy:** Sana'a University")
-    st.write("- **Location:** Yemen/Sana'a")
-    st.write("---")
-    st.write("## About Me")
-    st.write("B.A. Computer science student, AI engineer, Passionate about deep learning, and neural networks, keen to make things from scratch")
-    st.write("---")
+# Display or clear chat messages
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
 
-# Function to display projects
-def display_projects():
-    st.write("## Projects")
-    
-    # Paper Implementations Subsection
-    st.write("### Paper Implementations")
-    st.write("#### Transformer model")
-    st.write("**Title:** Attention is All you need")
-    st.write("**Description:**I built the Transformer model itself from scratch from the paper ""Attention is all you need"", Feel free to use this model for your specific purposes: translation, text generation, etc... ")
-    st.latex("P E(pos,2i) = sin(pos/100002i/dmodel )")
-    st.write("**GitHub:** [Link to GitHub Repository](https://github.com/Esmail-ibraheem/Transformer-model)")
-    st.info("""
-1. Input Embeddings: 
-    The input sequence is transformed into fixed-dimensional embeddings, typically composed of word embeddings and positional encodings. 
-    Word embeddings capture the semantic meaning of each word.
-2. Encoder and Decoder: 
-    The Transformer model consists of an encoder and a decoder. 
-    Both the encoder and decoder are composed of multiple layers. Each layer has two sub-layers: 
-    a multi-head self-attention mechanism and a feed-forward neural network. 
-    - Encoder: 
-        The encoder takes the input sequence and processes it through multiple layers of self-attention and feed-forward networks. 
-        It captures the contextual information of each word based on the entire sequence. 
-    - Decoder: 
-        The decoder generates the output sequence word by word, attending to the encoded input sequence's relevant parts. 
-        It also includes an additional attention mechanism called "encoder-decoder attention" that helps the model focus on the input during decoding.
-3. Self-Attention Mechanism: 
-    First, what is self-attention? 
-        It is the core of the Transformer model is the self-attention mechanism. 
-        It allows each word in the input sequence to attend to all other words, capturing their relevance and influence, 
-        works by seeing how similar and important each word is to all of the words in a sentence, including itself. 
-    Second, the Mechanism: 
-        - Multi-head attention in the encoder block: 
-            Plays a crucial role in capturing different types of information and learning diverse relationships between words. 
-            It allows the model to attend to different parts of the input sequence simultaneously and learn multiple representations of the same input. 
-        - Masked Multi-head attention in the decoder block: 
-            The same as Multi-head attention in the encoder block but this time for the translation sentence, 
-            is used to ensure that during the decoding process, each word can only attend to the words before it. 
-            This masking prevents the model from accessing future information, which is crucial for generating the output sequence step by step. 
-    - Self-attention mechanism: 
-        The core of the Transformer model is the self-attention mechanism. 
-        It allows each word in the input sequence to attend to all other words, capturing their relevance and influence. 
-        Self-attention computes three vectors for each word: Query, Key, and Value.
-        **Multi-head attention in the decoder block:** 
-        Do the same as the Multi- head attention in the encoder block but between the input sentence and the translation sentence, 
-        is employed to capture different relationships between the input sequence and the generated output sequence. 
-        It allows the decoder to attend to different parts of the encoder's output and learn multiple representations of the context.
-4. Feed Forward in two blocks: 
-    It is just feed forward neural network but in this paper the neurons are 2048.
-5. Add & Normalization
+def clear_chat_history():
+    st.session_state.messages = [{"role": "assistant", "content": "How may I assist you today?"}]
+st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
 
-Self-Attention Mechanism:
-        The core of the Transformer model is the self-attention mechanism. 
-        It allows each word in the input sequence to attend to all other words, capturing their relevance and influence. 
-        Self-attention computes three vectors for each word: Query (Q), Key (K), and Value (V).
-            - Query (Q): 
-                Each word serves as a query to compute the attention scores.
-                Q: what I am looking for.
-            - Key (K): 
-                Each word acts as a key to determine its relevance to other words.
-                K: what I can offer.
-            - Value (V): 
-                Each word contributes as a value to the attention-weighted sum.
-.
-""")
+# Function for generating LLaMA2 response. Refactored from https://github.com/a16z-infra/llama2-chatbot
+def generate_llama2_response(prompt_input):
+    string_dialogue = "You are a helpful assistant. You do not respond as 'User' or pretend to be 'User'. You only respond once as 'Assistant'."
+    for dict_message in st.session_state.messages:
+        if dict_message["role"] == "user":
+            string_dialogue += "User: " + dict_message["content"] + "\n\n"
+        else:
+            string_dialogue += "Assistant: " + dict_message["content"] + "\n\n"
+    output = replicate.run('a16z-infra/llama13b-v2-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5', 
+                           input={"prompt": f"{string_dialogue} {prompt_input} Assistant: ",
+                                  "temperature":temperature, "top_p":top_p, "max_length":max_length, "repetition_penalty":1})
+    return output
 
-    code = '''
-    from dataclasses import dataclass
-import math
-import torch 
-import torch.nn as nn 
-from torch.nn.functional import F 
+# User-provided prompt
+if prompt := st.chat_input(disabled=not replicate_api):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.write(prompt)
 
-@dataclass
-class Arguments:
-    source_vocab_size: int 
-    target_vocab_size: int 
-    source_sequence_length: int 
-    target_sequence_length: int 
-    d_model: int = 512 
-    Layers: int = 6 
-    heads: int = 8 
-    dropout: float = 0.1 
-    d_ff: int = 2048 
-
-class InputEmbeddingsLayer(nn.Module):
-    def __init__(self, d_model: int, vocab_size: int) -> None:
-        super().__init__()
-        self.d_model = d_model 
-        self.vocab_size = vocab_size
-        self.embedding = nn.Embedding(vocab_size, d_model)
-    
-    def forward(self, x):
-        return self.embedding(x) * math.sqrt(self.d_model)
-
-class PositionalEncodingLayer(nn.Module):
-    def __init__(self, d_model: int, sequence_length: int, dropout: float) -> None:
-        super().__init__()
-        self.d_model = d_model
-        self.sequence_length = sequence_length
-        self.dropout = nn.Dropout(dropout)
-
-        PE = torch.zeros(sequence_length, d_model)
-        Position = torch.arange(0, sequence_length, dtype=torch.float).unsqueeze(1)
-        deviation_term = torch.exp(torch.arange(0, d_model, 2).float * (-math.log(10000.0) / d_model))
-
-        PE[:, 0::2] = torch.sin(Position * deviation_term)
-        PE[:, 1::2] = torch.cos(Position * deviation_term)
-        PE = PE.unsqueeze(0)
-        self.register_buffer('PE', PE)
-    
-    def forward(self, x):
-        x = x + (self.PE[:, :x.shape[1], :]).requires_grad(False)
-        return self.dropout(x)
-
-    '''
-
-    st.code(code, language='python')
-    st.write("---")
-
-    st.write("#### Paper 2")
-    st.write("**Title:** Paper Title 2")
-    st.write("**Description:** Brief description of the paper implementation.")
-    st.write("**GitHub:** [Link to GitHub Repository](link_to_repo)")
-    st.write("---")
-    
-    # Other Projects Subsection
-    st.write("### Other Projects")
-    st.write("#### Project 1")
-    st.write("**Title:** Project Title 1")
-    st.write("**Description:** Brief description of the project.")
-    st.write("**Technologies Used:** Technologies used in the project.")
-    st.write("**GitHub:** [Link to GitHub Repository](link_to_repo)")
-    st.write("---")
-
-    st.write("#### Project 2")
-    st.write("**Title:** Project Title 2")
-    st.write("**Description:** Brief description of the project.")
-    st.write("**Technologies Used:** Technologies used in the project.")
-    st.write("**GitHub:** [Link to GitHub Repository](link_to_repo)")
-    st.write("[Download](https://github.com/Esmail-ibraheem/Transformer-model.git)")
-    st.write("---")
-
-    # Add more projects or paper implementations as needed
-
-# Sidebar
-st.sidebar.title("Navigation")
-navigation = st.sidebar.radio("Go to", ("Profile", "Projects"))
-
-# Main content
-if navigation == "Profile":
-    display_profile()
-elif navigation == "Projects":
-    display_projects()
+# Generate a new response if last message is not from assistant
+if st.session_state.messages[-1]["role"] != "assistant":
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            response = generate_llama2_response(prompt)
+            placeholder = st.empty()
+            full_response = ''
+            for item in response:
+                full_response += item
+                placeholder.markdown(full_response)
+            placeholder.markdown(full_response)
+    message = {"role": "assistant", "content": full_response}
+    st.session_state.messages.append(message)
